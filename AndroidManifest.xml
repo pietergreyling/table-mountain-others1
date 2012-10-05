@@ -14,13 +14,14 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".TableMountainReaderActivity"
-            android:label="@string/title_activity_table_mountain_reader" >
+            android:label="@string/title_activity_table_mountain_reader"
+            android:configChanges="orientation" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="PostViewActivity"></activity>
     </application>
 
 </manifest>

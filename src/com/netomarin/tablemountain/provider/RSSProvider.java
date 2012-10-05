@@ -13,6 +13,8 @@ import com.netomarin.tablemountain.data.FeedDAO;
 import com.netomarin.tablemountain.data.PostDAO;
 import com.netomarin.tablemountain.data.RSSOpenHelper;
 
+import java.util.List;
+
 public class RSSProvider extends ContentProvider {
 
     public static final String AUTHORITY = "com.netomarin.tablemountain.provider.rss";
@@ -20,13 +22,21 @@ public class RSSProvider extends ContentProvider {
 
     private final static int FEED_PROVIDER_URI = 1;
     private final static int POST_PROVIDER_URI = 2;
+    private final static int POST_LIST_PROVIDER_URI = 3;
 
     private final static UriMatcher URI_MATCHER;
+    
+    private RSSOpenHelper helper;
 
     static {
         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
         URI_MATCHER.addURI(AUTHORITY, "feed/#", FEED_PROVIDER_URI);
         URI_MATCHER.addURI(AUTHORITY, "post/#", POST_PROVIDER_URI);
+        URI_MATCHER.addURI(AUTHORITY, "posts/#", POST_LIST_PROVIDER_URI);
+    }
+    
+    public static final class POST_LIST implements BaseColumns {
+        public static final String POST_LIST = "POST_LIST";
     }
 
     public static final class POST implements BaseColumns {
@@ -57,6 +67,19 @@ public class RSSProvider extends ContentProvider {
         public static final String START_INDEX = "START_INDEX";
         public static final String ITEMS_PER_PAGE = "ITEMS_PER_PAGE";
     }
+    
+    @Override
+    public boolean onCreate() {
+        helper = new RSSOpenHelper(getContext());        
+        return helper != null;
+    }
+
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+            String sortOrder) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -82,11 +105,34 @@ public class RSSProvider extends ContentProvider {
             case POST_PROVIDER_URI:
                 insertedRow = insertPost(values);
                 break;
+            case POST_LIST_PROVIDER_URI:
+                insertedRow = insertPostList(values);
             default:
                 throw new IllegalArgumentException("Unknown Uri");
         }
         
         return insertedRow;
+    }
+
+    private Uri insertPostList(ContentValues values) {
+        if (!values.containsKey(POST_LIST.POST_LIST)) {
+            throw new IllegalArgumentException("Missing required field: "+POST_LIST.POST_LIST);
+        }
+        
+        if (!(values.get(POST_LIST.POST_LIST) instanceof List<?>)) {
+            throw new IllegalArgumentException("Expecting a List of ContentValues to be inserted");            
+        }
+        
+        List<ContentValues> postList = (List<ContentValues>) values.get(POST_LIST.POST_LIST); 
+        long feedId = postList.get(0).getAsLong(POST.FEED_ID);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        for (ContentValues post : postList) {
+            db.insert(PostDAO.POST_TABLE, null, post);
+        }
+        
+        db.close();
+        
+        return Uri.parse("content://" + AUTHORITY + "/posts/"+feedId);
     }
 
     private Uri insertPost(ContentValues values) {
@@ -96,7 +142,7 @@ public class RSSProvider extends ContentProvider {
            throw new IllegalArgumentException("Missing required field");
        }
        
-       SQLiteDatabase db = new RSSOpenHelper(getContext()).getWritableDatabase();
+       SQLiteDatabase db = helper.getWritableDatabase();
        long newId = db.insert(PostDAO.POST_TABLE, null, values);
        db.close();
        
@@ -108,7 +154,7 @@ public class RSSProvider extends ContentProvider {
             throw new IllegalArgumentException("Missing required field: title");
         }
                 
-        SQLiteDatabase db = new RSSOpenHelper(getContext()).getWritableDatabase();
+        SQLiteDatabase db = helper.getWritableDatabase();
         long newId = db.insert(FeedDAO.FEED_TABLE, "", values);
         db.close();
         
@@ -116,22 +162,8 @@ public class RSSProvider extends ContentProvider {
     }
 
     @Override
-    public boolean onCreate() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-            String sortOrder) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         // TODO Auto-generated method stub
         return 0;
     }
-
 }

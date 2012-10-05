@@ -1,11 +1,16 @@
 package com.netomarin.tablemountain.rss.atom;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class Entry {
-
+public class Entry implements Serializable {
+    
+    private static final long serialVersionUID = -309361930936168229L;
+    
+    private long _id;
     private String id;
+    private long feedId;
     private Date published;
     private Date updated;
     private Date edited;
@@ -15,6 +20,22 @@ public class Entry {
     private Author author;
     private ArrayList<String> contributors;
     
+    public long get_id() {
+        return _id;
+    }
+
+    public void set_id(long _id) {
+        this._id = _id;
+    }
+    
+    public long getFeedId() {
+        return feedId;
+    }
+
+    public void setFeedId(long feedId) {
+        this.feedId = feedId;
+    }
+
     public String getId() {
         return id;
     }

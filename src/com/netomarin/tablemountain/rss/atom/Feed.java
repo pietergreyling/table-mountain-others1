@@ -1,10 +1,14 @@
 package com.netomarin.tablemountain.rss.atom;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class Feed {
+public class Feed implements Serializable {
 
+    private static final long serialVersionUID = -7402578840389597952L;
+    
+    private long _id;
     private String id;
     private Date updated;
     private ArrayList<String> categories;
@@ -18,6 +22,14 @@ public class Feed {
     private int itemsPerPage;
     private ArrayList<Entry> entries;
     
+    public long get_id() {
+        return _id;
+    }
+
+    public void set_id(long _id) {
+        this._id = _id;
+    }
+
     public String getId() {
         return id;
     }

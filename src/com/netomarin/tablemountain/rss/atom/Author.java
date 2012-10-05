@@ -1,7 +1,11 @@
 package com.netomarin.tablemountain.rss.atom;
 
-public class Author {
+import java.io.Serializable;
 
+public class Author implements Serializable {
+
+    private static final long serialVersionUID = -9006349980898721852L;
+    
     private String name;
     private String url;
     private String email;
