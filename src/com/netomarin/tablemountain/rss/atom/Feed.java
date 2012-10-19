@@ -10,6 +10,7 @@ public class Feed implements Serializable {
     
     private long _id;
     private String id;
+    private String url;
     private Date updated;
     private ArrayList<String> categories;
     private String title;
@@ -38,6 +39,14 @@ public class Feed implements Serializable {
         this.id = id;
     }
     
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public Date getUpdated() {
         return updated;
     }

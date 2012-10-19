@@ -5,18 +5,6 @@
         android:icon="@drawable/ic_action_refresh"
         android:showAsAction="always"
         android:title="Refresh"/>
-    
-    <item
-        android:id="@+id/menu_share"
-        android:icon="@drawable/ic_action_share"
-        android:showAsAction="always"
-        android:title="Share"/>
-    
-    <item
-        android:id="@+id/menu_favorite"
-        android:icon="@drawable/ic_action_star"
-        android:showAsAction="always"
-        android:title="Favorite"/>
     <item
         android:id="@+id/menu_settings"
         android:orderInCategory="100"

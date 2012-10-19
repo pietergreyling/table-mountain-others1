@@ -6,5 +6,7 @@
     <string name="title_activity_table_mountain_reader">Table Mountain</string>
     <string name="txt_by">by</string>
     <string name="txt_published">published on</string>
+    <string name="txt_getting_news">Getting news...</string>
+    <string name="error_no_connection">Error getting data. Check your connection!</string>
 
 </resources>

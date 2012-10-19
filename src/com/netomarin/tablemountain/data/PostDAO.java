@@ -2,6 +2,7 @@
 package com.netomarin.tablemountain.data;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 
 import com.google.gson.Gson;
 import com.netomarin.tablemountain.commons.Constants;
@@ -35,9 +36,14 @@ public class PostDAO {
         SimpleDateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMATTER_PATTERN);
         ContentValues values = new ContentValues();
 
-        values.put(POST._ID, entry.get_id());
+        if (entry.get_id() > 0)
+            values.put(POST._ID, entry.get_id());
+        
         values.put(POST.POST_ID, entry.getId());
-        values.put(POST.FEED_ID, entry.getFeedId());
+        
+        if (entry.getFeedId() > 0)
+            values.put(POST.FEED_ID, entry.getFeedId());
+        
         if (entry.getPublished() != null)
             values.put(POST.PUBLISHED, formatter.format(entry.getPublished()));
 
@@ -114,6 +120,66 @@ public class PostDAO {
                 e.printStackTrace();
             }
         }
+        return entry;
+    }
+    
+    public static Entry fromCursor(Cursor c) {
+        Entry entry = new Entry();
+        SimpleDateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMATTER_PATTERN);
+        
+        entry.setId(c.getString(c.getColumnIndex(POST.POST_ID)));
+        entry.set_id(c.getLong(c.getColumnIndex(POST._ID)));
+        entry.setFeedId(c.getLong(c.getColumnIndex(POST.FEED_ID)));
+
+        try {
+            String dateAux = c.getString(c.getColumnIndex(POST.PUBLISHED));
+            if (dateAux != null)
+                entry.setPublished(formatter.parse(dateAux));
+
+            dateAux = c.getString(c.getColumnIndex(POST.UPDATED));
+            if (dateAux != null)
+                entry.setUpdated(formatter.parse(dateAux));
+
+            dateAux = c.getString(c.getColumnIndex(POST.EDITED));
+            if (dateAux != null)
+                entry.setEdited(formatter.parse(dateAux));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        String stringJSON = c.getString(c.getColumnIndex(POST.CATEGORIES));
+        if (stringJSON != null) {
+            try {
+                JSONArray jsonArray = new JSONArray(stringJSON);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    entry.addCategory(jsonArray.getString(i));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        entry.setTitle(c.getString(c.getColumnIndex(POST.TITLE)));
+        entry.setContent(c.getString(c.getColumnIndex(POST.CONTENT)));
+
+        stringJSON = c.getString(c.getColumnIndex(POST.AUTHOR));
+        if (stringJSON != null) {
+            Gson gson = new Gson();
+            entry.setAuthor(gson.fromJson(stringJSON, Author.class));
+        }
+
+        stringJSON = c.getString(c.getColumnIndex(POST.CONTRIBUTORS));
+        if (stringJSON != null) {
+            try {
+                JSONArray jsonArray = new JSONArray(stringJSON);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    entry.addContributor(jsonArray.getString(i));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        
         return entry;
     }
 }

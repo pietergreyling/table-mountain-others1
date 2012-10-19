@@ -18,6 +18,7 @@ public class RSSOpenHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE "+FeedDAO.FEED_TABLE +" ( "+
                 FeedDAO._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + "," +
                 FeedDAO.FEED_ID + " TEXT, "+
+                FeedDAO.URL + " TEXT, "+
                 FeedDAO.UPDATED + " TEXT, "+
                 FeedDAO.CATEGORIES + " TEXT, "+
                 FeedDAO.TITLE + " TEXT, "+

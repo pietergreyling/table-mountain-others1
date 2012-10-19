@@ -2,9 +2,11 @@
 package com.netomarin.tablemountain.data;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 
 import com.google.gson.Gson;
 import com.netomarin.tablemountain.commons.Constants;
+import com.netomarin.tablemountain.provider.RSSProvider;
 import com.netomarin.tablemountain.provider.RSSProvider.FEED;
 import com.netomarin.tablemountain.rss.atom.Author;
 import com.netomarin.tablemountain.rss.atom.Feed;
@@ -21,6 +23,7 @@ public class FeedDAO {
 
     public static final String _ID = "_ID";
     public static final String FEED_ID = "FEED_ID";
+    public static final String URL = "URL";
     public static final String UPDATED = "UPDATED";
     public static final String CATEGORIES = "CATEGORIES";
     public static final String TITLE = "TITLE";
@@ -35,8 +38,10 @@ public class FeedDAO {
     public static ContentValues toContentValues(Feed feed) {
         SimpleDateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMATTER_PATTERN);
         ContentValues values = new ContentValues();
-        values.put(FEED._ID, feed.get_id());
+        if (feed.get_id() > 0)
+            values.put(FEED._ID, feed.get_id());
         values.put(FEED.FEED_ID, feed.getId());
+        values.put(FEED.URL, feed.getUrl());
 
         if (feed.getUpdated() != null)
             values.put(FEED.UPDATED, formatter.format(feed.getUpdated()));
@@ -66,7 +71,8 @@ public class FeedDAO {
         Feed feed = new Feed();
         feed.set_id(values.getAsLong(FEED._ID));
         feed.setId(values.getAsString(FEED.FEED_ID));
-
+        feed.setUrl(values.getAsString(FEED.URL));
+        
         try {
             feed.setUpdated(formatter.parse(values.getAsString(FEED.UPDATED)));
         } catch (ParseException e) {
@@ -98,6 +104,50 @@ public class FeedDAO {
         feed.setStartIndex(values.getAsInteger(FEED.START_INDEX));
         feed.setItemsPerPage(values.getAsInteger(FEED.ITEMS_PER_PAGE));
 
+        return feed;
+    }
+    
+    public static Feed fromCursor(Cursor c) {
+        SimpleDateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMATTER_PATTERN);
+        Feed feed = new Feed();
+        
+        feed.set_id(c.getLong(c.getColumnIndex(RSSProvider.FEED._ID)));
+        feed.setAlternateLink(c.getString(c.getColumnIndex(RSSProvider.FEED.ALT_LINK)));
+        
+        String authorJSON = c.getString(c.getColumnIndex(RSSProvider.FEED.AUTHOR));
+        if (authorJSON != null) {
+            Gson gson = new Gson();
+            feed.setAuthor(gson.fromJson(authorJSON, Author.class));
+        }
+        
+        String categoriesJSON = c.getString(c.getColumnIndex(RSSProvider.FEED.CATEGORIES));
+        if (categoriesJSON != null) {
+            try {
+                JSONArray jsonArray = new JSONArray(categoriesJSON);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    feed.addCategory(jsonArray.getString(i));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        feed.setId(c.getString(c.getColumnIndex(RSSProvider.FEED.FEED_ID)));
+        feed.setItemsPerPage(c.getInt(c.getColumnIndex(RSSProvider.FEED.ITEMS_PER_PAGE)));
+        feed.setNextLink(c.getString(c.getColumnIndex(RSSProvider.FEED.NEXT_LINK)));
+        feed.setStartIndex(c.getInt(c.getColumnIndex(RSSProvider.FEED.START_INDEX)));
+        feed.setSubtitle(c.getString(c.getColumnIndex(RSSProvider.FEED.SUBTITLE)));
+        feed.setTitle(c.getString(c.getColumnIndex(RSSProvider.FEED.TITLE)));
+        feed.setTotalResults(c.getInt(c.getColumnIndex(RSSProvider.FEED.TOTAL_RESULTS)));
+        
+        try {
+            feed.setUpdated(formatter.parse(c.getString(c.getColumnIndex(RSSProvider.FEED.UPDATED))));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        
+        feed.setUrl(c.getString(c.getColumnIndex(RSSProvider.FEED.URL)));
+        
         return feed;
     }
 }

@@ -3,6 +3,7 @@ package com.netomarin.tablemountain;
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.view.Menu;
 
 import com.netomarin.tablemountain.rss.atom.Entry;
 
@@ -29,5 +30,11 @@ public class PostViewActivity extends Activity {
         this.post = (Entry) getIntent().getSerializableExtra(PARAM_POST);
         this.postFragment = (PostViewFragment) getFragmentManager().findFragmentById(R.id.postViewActivityFragment);
         postFragment.showPost(post);
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.post_view_activity_menu, menu);
+        return true;
     }
 }
