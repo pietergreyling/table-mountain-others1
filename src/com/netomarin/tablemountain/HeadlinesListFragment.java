@@ -10,7 +10,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -30,20 +37,38 @@ public class HeadlinesListFragment extends ListFragment {
     private ProgressDialog progress;
     private int postSelected;
     private FeedHandler feedHandler;
+    
+    private ImageView refreshImageView;
+    private Animation refreshAnimation;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        
         this.feedHandler = new FeedHandler(this);
         this.postSelected = -1;
         this.adapter = new HeadlinesListAdapter(getActivity());
         setListAdapter(adapter);
-
+        setHasOptionsMenu(true);
+        refreshImageView = new ImageView(getActivity());
+        refreshImageView.setImageResource(R.drawable.ic_action_refresh);
+        refreshImageView.setOnClickListener(new OnClickListener() {            
+            public void onClick(View v) {
+                refreshHeadlines();
+            }
+        });
+        
         if (savedInstanceState != null) {
             this.feed = (Feed) savedInstanceState.getSerializable(KEY_FEED);
             this.postSelected = savedInstanceState.getInt(KEY_POST_SELECTED);
         }
+    }
+
+    private void refreshHeadlines() {
+        refreshAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate);
+        refreshAnimation.setRepeatCount(Animation.INFINITE);        
+        refreshImageView.startAnimation(refreshAnimation);
+        getRSSFeed();
     }
 
     @Override
@@ -61,6 +86,7 @@ public class HeadlinesListFragment extends ListFragment {
     public void onResume() {
         super.onResume();
         if (this.feed == null) {
+            progress = ProgressDialog.show(getActivity(), null, getString(R.string.txt_getting_news));
             getRSSFeed();
         } else {
             adapter.setEntries(feed.getEntries());
@@ -82,7 +108,6 @@ public class HeadlinesListFragment extends ListFragment {
     }
 
     private void getRSSFeed() {
-        progress = ProgressDialog.show(getActivity(), null, getString(R.string.txt_getting_news));
         Intent feedIntent = new Intent(getActivity(), FeedIntentService.class);
         feedIntent.putExtra(FeedIntentService.EXTRA_FEED_URL,
                 "android-developers.blogspot.com/atom.xml");
@@ -101,6 +126,8 @@ public class HeadlinesListFragment extends ListFragment {
             showPost(feed.getEntries().get(0), true);
         }
 
+        if (refreshAnimation != null)
+            refreshAnimation.cancel();
         if (progress != null)
             progress.dismiss();
     }
@@ -111,6 +138,26 @@ public class HeadlinesListFragment extends ListFragment {
         Entry selected = feed.getEntries().get(position);
         postSelected = position;
         showPost(selected, false);
+    }
+    
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        MenuItem item = menu.findItem(R.id.menu_refresh);
+        item.setActionView(this.refreshImageView);
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_refresh) {
+            Animation rotation = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate);
+            rotation.setRepeatCount(Animation.INFINITE);
+            
+            refreshImageView.startAnimation(rotation);
+//            item.setActionView(iv);
+        }
+        
+        return super.onOptionsItemSelected(item);
     }
 
     private void showPost(Entry selected, boolean onlyHorizontal) {
@@ -125,6 +172,9 @@ public class HeadlinesListFragment extends ListFragment {
     }
 
     public void feedError() {
+        if (refreshAnimation != null)
+            refreshAnimation.cancel();
+        
         if (progress != null)
             progress.dismiss();
 

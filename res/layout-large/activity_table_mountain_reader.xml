@@ -1,0 +1,22 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >    
+
+    <fragment
+        android:id="@+id/headlineListFragment"
+        android:name="com.netomarin.tablemountain.HeadlinesListFragment"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content" />
+    
+    <fragment
+        android:id="@+id/postViewFragment"
+        android:name="com.netomarin.tablemountain.PostViewFragment"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="3"
+        tools:layout="@layout/post_view_layout" />
+
+</LinearLayout>

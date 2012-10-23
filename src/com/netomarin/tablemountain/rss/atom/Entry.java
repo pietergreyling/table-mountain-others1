@@ -19,6 +19,8 @@ public class Entry implements Serializable {
     private String content;
     private Author author;
     private ArrayList<String> contributors;
+    private String alternateLink;
+    private String selfLink;
     
     public long get_id() {
         return _id;
@@ -118,5 +120,21 @@ public class Entry implements Serializable {
         if (this.contributors == null)
             this.contributors = new ArrayList<String>();
         contributors.add(contributor);
+    }
+
+    public String getAlternateLink() {
+        return alternateLink;
+    }
+
+    public void setAlternateLink(String alternateLink) {
+        this.alternateLink = alternateLink;
+    }
+
+    public String getSelfLink() {
+        return selfLink;
+    }
+
+    public void setSelfLink(String selfLink) {
+        this.selfLink = selfLink;
     }
 }

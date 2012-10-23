@@ -127,6 +127,17 @@ public class AtomXMLParser {
                 entry.setContent(readText(name, parser));
             } else if (name.equals("author")) {
                 entry.setAuthor(readAuthor(parser));
+            } else if (name.equals("link")) {
+                parser.require(XmlPullParser.START_TAG, null, "link");
+                String link = parser.getAttributeValue(null, "href");
+                String relType = parser.getAttributeValue(null, "rel");
+                if (relType.equals("alternate")) {
+                    entry.setAlternateLink(link);
+                } else if (relType.equals("self")) {
+                    entry.setSelfLink(link);
+                }
+                parser.nextTag();
+                parser.require(XmlPullParser.END_TAG, null, "link");
             } else {
                 skip(parser);
             }
