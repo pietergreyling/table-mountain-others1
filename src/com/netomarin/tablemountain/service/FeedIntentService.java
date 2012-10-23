@@ -127,6 +127,7 @@ public class FeedIntentService extends IntentService {
             }
         }
 
+        //TODO delete previous posts
         ContentValues postCV = null;
         for (Entry entry : feed.getEntries()) {
             postCV = PostDAO.toContentValues(entry);
